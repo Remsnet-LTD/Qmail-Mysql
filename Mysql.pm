@@ -10,7 +10,7 @@ use DBI;
 use File::Path;
 
 
-$Qmail::Mysql::VERSION	= '0.01';
+$Qmail::Mysql::VERSION	= '0.02';
 
 
 # Fields that can be set in new method, with defaults
@@ -130,7 +130,8 @@ sub mail_add {
 	$self->_check_mbox_base($vhost,$qmaild_id,$qmail_id);
 	# create user qmail dirs
 	foreach (('','Maildir','Maildir/cur','Maildir/new','Maildir/tmp')) {
-		$self->_make_qmail_dir($mbox_path ."/$_",$qmaild_id,$qmail_id,'0711');
+		my $mask = $_ eq '' ? 0700 : 0711;
+		$self->_make_qmail_dir($mbox_path ."/$_",$qmaild_id,$qmail_id,$mask);
 	}
 	# add user to db
 	# add user to virtual table
@@ -267,9 +268,9 @@ sub _check_mbox_base {
     my $qgrp    = shift;
 
 	my $dir		= $self->{mailbox_base};
-	$self->_make_qmail_dir(	$dir,$quser,$qgrp,'0711') if (!-e $dir);
+	$self->_make_qmail_dir(	$dir,$quser,$qgrp,0700) if (!-e $dir);
 	$dir	 	.= "/$vhost";
-	$self->_make_qmail_dir( $dir,$quser,$qgrp,'0711') 
+	$self->_make_qmail_dir( $dir,$quser,$qgrp,0700) 
 								if ($self->{multihosting} && !-e $dir);
 }
 
